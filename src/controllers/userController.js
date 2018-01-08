@@ -1,4 +1,3 @@
-var jwt = require('jsonwebtoken')
 var mssql = require('mssql')
 var httpMsg = require('../core/httpMsg')
 var settings = require('../settings')

@@ -3,51 +3,57 @@ var mssql = require('mssql');
 var httpMsg = require('../core/httpMsg');
 var settings = require('../settings');
 
-exports.authenticate = function(req, resp) {
-    if (!req.body) throw new Error("Input not valid");    
-    try{
-      var objUser = req.body;
-      if(objUser){
-          var conn = new mssql.Connection(settings.dbConfig);
-          conn.connect()
+exports.authenticate = (req, resp) => {
+    try {
+        if (!req.body) throw new Error("input not valid.")    
+
+        const { LoginName, Password } = req.body
+
+        var conn = new mssql.Connection(settings.dbConfig)
+            conn.connect()
             .then(function() {
-                var request = new mssql.Request(conn);
-                request.input('LoginName', objUser.LoginName)
+                var cmd = new mssql.Request(conn)
+                cmd.input('LoginName', objUser.LoginName)
                 .input('Password', objUser.Password)
                 .execute("sp_auth_user")
-                .then(function(data) {
+                .then((data) => {
                     var userInfo = data[0][0];
                     var encodeTokenString = '';
                     var isAuthenticate = false;
 
+                    // check user logged is true.
                     if (userInfo.LoggedStatus == 200) {
                         isAuthenticate = true;
-                        encodeTokenString = jwt.sign({
-                            LoginName: objUser.LoginName,
-                            UserID: userInfo.UserID,
-                            UserGroupID: 1
-                        }, settings.secert, { expiresIn: 86400});    
+
+                        // create token with jwt.
+                        encodeTokenString = jwt.sign(
+                            {
+                             LoginName: objUser.LoginName,
+                             UserID: userInfo.UserID,
+                             UserGroupID: 1
+                            }, 
+                            settings.secert, 
+                            { 
+                                expiresIn: 86400
+                            }
+                        )    
                     }
                     
-                    httpMsg.sendJson(req, resp, {
-                        auth:{
-                            authenticate: isAuthenticate,
-                            status: userInfo.LoggedStatus,
-                            token: encodeTokenString
-                        },
-                        user: userInfo
-                    });
+                    // response json message.
+                    httpMsg.sendJson(req, resp, 
+                        {
+                            auth:{
+                                authenticate: isAuthenticate,
+                                status: userInfo.LoggedStatus,
+                                token: encodeTokenString
+                            },
+                            user: userInfo
+                        }
+                    )
                 })
-                .catch(function(error) { 
-                    httpMsg.show500(req, resp, error);
-                })
-            });
-      }
-      else {
-          // throw new Error("Input not valid");
-
-      }
-  }catch (ex) {
-      httpMsg.show500(req, resp, ex);
-  }
-};
+            })
+     
+    } catch (error) {
+        httpMsg.show500(req, resp, error.message);
+    }
+}
