@@ -1,9 +1,20 @@
+// -----------------------------------------------
+// author: Suthicha Poonakaow
+// date: 08.01.2018 
+// description: user authentication
+// email: <isuthicha@gmail.com>
+// -----------------------------------------------
+
 var jwt = require('jsonwebtoken');
 var mssql = require('mssql');
 var httpMsg = require('../core/httpMsg');
 var settings = require('../settings');
 
-exports.authenticate = (req, resp) => {
+
+// -----------------------------------------------
+// login process.
+// -----------------------------------------------
+exports.login = (req, resp) => {
     try {
         if (!req.body) throw new Error("input not valid.")    
 
@@ -11,7 +22,7 @@ exports.authenticate = (req, resp) => {
 
         var conn = new mssql.Connection(settings.dbConfig)
             conn.connect()
-            .then(function() {
+            .then(()=> {
                 var cmd = new mssql.Request(conn)
                 cmd.input('LoginName', objUser.LoginName)
                 .input('Password', objUser.Password)

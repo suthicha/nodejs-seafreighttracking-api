@@ -9,7 +9,11 @@ var httpMsg = require('../core/httpMsg')
 var statmentBuilder = require('../core/statmentBuilder')
 var settings = require('../settings')
 
-exports.getShipments = (req, resp, fromdate, todate, refno) => {
+
+// -----------------------------------------------
+// find shipment information from job control system.
+// -----------------------------------------------
+exports.findJobs = (req, resp, fromdate, todate, refno) => {
     try{
         // create sql command text.
         const commandText = statmentBuilder.getShipmentCommandText (fromdate, todate, refno)

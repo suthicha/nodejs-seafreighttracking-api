@@ -1,103 +1,142 @@
+// -----------------------------------------------
+// author: Suthicha Poonakaow
+// date: 08.01.2018
+// description: user controller.
+// email: <isuthicha@gmail.com>
+// -----------------------------------------------
+
 var mssql = require('mssql')
 var httpMsg = require('../core/httpMsg')
 var settings = require('../settings')
 
-exports.register = function(req, resp) {
-    
-    if(!req.body) throw new Error('Input not valid');
+
+// -----------------------------------------------
+// register a new user.
+// -----------------------------------------------
+exports.register = (req, resp) => {
     try {
-        var objUser = req.body;
+        if(!req.body) throw new Error('Input not valid');
+        
+        const { LoginName, Password, FirstName, LastName, Email, PhoneNO } = req.body;
         var conn = new mssql.Connection(settings.dbConfig);
         conn.connect()
-            .then(function() {
-                var request = new mssql.Request(conn);
-                request.input('LoginName', objUser.LoginName)
-                .input('Password', objUser.Password)
-                .input('FirstName', objUser.FirstName)
-                .input('LastName', objUser.LastName)
-                .input('Email', objUser.Email)
-                .input('PhoneNO', objUser.PhoneNO)
+            .then(()=> {
+                var cmd = new mssql.Request(conn);
+                cmd.input('LoginName', LoginName)
+                .input('Password', Password)
+                .input('FirstName', FirstName)
+                .input('LastName', LastName)
+                .input('Email', Email)
+                .input('PhoneNO', PhoneNO)
                 .execute('sp_insert_user')
-                .then(function() {
-                    httpMsg.show200(req, resp);
-                })
-                .catch(function(error) { 
-                    httpMsg.show500(req, resp, error);
-                })
-            });
+                .then(()=>{httpMsg.show200(req, resp)})
+                .catch((error)=>{httpMsg.show500(req, resp, error)})
+            }
+        )
+
     }catch(err){
         httpMsg.show500(req, resp, err);
     }
 };
 
-exports.update = function(req, resp, id) {
-    if(!id) throw new Error("Input not valid");
+
+// -----------------------------------------------
+// update user information.
+// -----------------------------------------------
+exports.update = (req, resp, id) => {
     try {
-        var objUser = req.body;
+        if(!id) throw new Error("Input not valid");
+        
+        const { LoginName, FirstName, Email, PhoneNO, UserGroupID } = req.body;
         var conn = new mssql.Connection(settings.dbConfig);
         conn.connect()
-            .then(function() {
-                var request = new mssql.Request(conn);
-                request.input('UserID', id)
-                .input('LoginName', objUser.LoginName)
-                .input('FirstName', objUser.FirstName)
-                .input('LastName', objUser.LastName)
-                .input('Email', objUser.Email)
-                .input('PhoneNO', objUser.PhoneNO)
-                .input('UserGroupID', objUser.UserGroupID)
+            .then(()=> {
+                var cmd = new mssql.Request(conn);
+                cmd.input('UserID', id)
+                .input('LoginName', LoginName)
+                .input('FirstName', FirstName)
+                .input('LastName', LastName)
+                .input('Email', Email)
+                .input('PhoneNO', PhoneNO)
+                .input('UserGroupID', UserGroupID)
                 .execute('sp_update_user')
-                .then(function() {
-                    httpMsg.show200(req, resp);
-                })
-                .catch(function(error) {
-                    httpMsg.show500(req, resp, error);
-                })
-            });
+                .then(()=>{httpMsg.show200(req, resp)})
+                .catch((error)=>{httpMsg.show500(req, resp, error)})
+            }
+        )
     }catch(error) {
         httpMsg.show500(req, resp, error);
     }
 };
 
-exports.resetPassword = function(req, resp) {
-    if (!req.body) throw new Error('Input not valid');
+
+// -----------------------------------------------
+// delete user
+// -----------------------------------------------
+exports.delete = (req, resp, id) => {
     try {
-        var objUser = req.body;
+        
+        if(!id) throw new Error("Input not valid");
+        var conn = new mssql.Connection(settings.dbConfig)
+        conn.connect()
+            .then(()=>{
+                var cmd = new mssql.Request(conn)
+                cmd.input('UserID', id)
+                .execute('sp_delete_user')
+                .then(()=>{ httpMsg.show200(req, resp)})
+                .catch((error)=>{throw new Error(error.message)})
+            }
+        )
+
+    }catch (error) {
+        httpMsg.show500(req, resp, error)
+    }
+}
+
+
+// -----------------------------------------------
+// reset user password.
+// -----------------------------------------------
+exports.resetPassword = (req, resp) => {
+    try {
+        if (!req.body) throw new Error('Input not valid');
+        
+        const { UserID, LoginName, Password } = req.body;
         var conn = new mssql.Connection(settings.dbConfig);
         conn.connect()
-            .then(function() {
-                var request = new mssql.Request(conn);
-                request.input('UserID', objUser.UserID)
-                .input('LoginName', objUser.LoginName)
-                .input('NewPassword', objUser.Password)
+            .then(()=>{
+                var cmd = new mssql.Request(conn);
+                cmd.input('UserID', UserID)
+                .input('LoginName', LoginName)
+                .input('NewPassword', Password)
                 .execute('sp_reset_password')
-                .then(function() {
-                    httpMsg.show200(req, resp);
-                })
-                .catch(function(error) {
-                    httpMsg.show500(req, resp, error);
-                })
-            });
+                .then(()=>{ httpMsg.show200(req, resp) })
+                .catch((error)=>{ httpMsg.show500(req, resp, error)})
+            }
+        )
     }catch(error) {
         httpMsg.show500(req, resp, error);
     }
 };
 
-exports.getList = function(req, resp, id) {
-    if (!id) throw new Error('Input not valid');
+
+// -----------------------------------------------
+// retrive all user.
+// -----------------------------------------------
+exports.getAll = (req, resp, id) => {
     try {
+        if (!id) throw new Error('Input not valid');
+        
         var conn = new mssql.Connection(settings.dbConfig);
         conn.connect()
-            .then(function() {
-                var request = new mssql.Request(conn);
-                request.input("UserID", id)
+            .then(()=> {
+                var cmd = new mssql.Request(conn);
+                cmd.input("UserID", id)
                 .execute('sp_select_users')
-                .then(function(data) {
-                    httpMsg.sendJson(req, resp, data[0]);
-                })
-                .catch(function(error) {
-                    httpMsg.show500(req, resp, error);
-                })
-            });
+                .then((data)=>{ httpMsg.sendJson(req, resp, data[0])})
+                .catch((error)=>{ httpMsg.show500(req, resp, error)})
+            }
+        )
     }catch(error){
         httpMsg.show500(req, resp, error);
     }

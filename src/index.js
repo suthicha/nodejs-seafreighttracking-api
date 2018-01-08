@@ -5,9 +5,9 @@ var bodyParser = require('body-parser')
 var jwt = require('jsonwebtoken')
 var settings = require('./settings')
 var httpMsg = require('./core/httpMsg')
-var userCtrl  = require('./controllers/userController')
-var authCtrl = require('./controllers/authenController')
-var shipmentCtrl = require('./controllers/shipmentController')
+var authController = require('./controllers/authController')
+var userController  = require('./controllers/userController')
+var jobController = require('./controllers/jobController')
 
 app.set('secert', settings.secert);
 app.use(cors());
@@ -19,14 +19,14 @@ app.get('/', function(req, resp) {
     resp.send('The API is at the http://localhost:' + settings.webPort + '/api');
 });
 
-var apiRoute = express.Router();
+var router = express.Router();
 
-apiRoute.put('/register', function(req, resp) { 
-    userCtrl.register(req, resp);
+router.put('/register', function(req, resp) { 
+    userController.register(req, resp)
 });
 
-apiRoute.post('/authenticate', function(req, resp) {
-    authCtrl.authenticate(req, resp);
+router.post('/authenticate', function(req, resp) {
+    authController.login(req, resp)
 });
 
 // ---------------------------------------------------------
@@ -59,19 +59,41 @@ apiRoute.post('/authenticate', function(req, resp) {
 //     }
 // });
 
+
 // -----------------------------------------------
-// Shipments
+// User controller.
 // -----------------------------------------------
-apiRoute.get('/shipment/:fromdate/:todate/:refno', (req, resp) => {
-  shipmentCtrl.getShipments(req, resp, req.params.fromdate, req.params.todate, req.params.refno)
+router.post('/user/:id', (req, resp) => { 
+    const { id } = req.params
+    userController.update(req, resp, id)
+})
+
+
+router.delete('/user/:id', (req, resp) => {
+    const { id } = req.params
+})
+
+
+// -----------------------------------------------
+// Job and shipment routes.
+// -----------------------------------------------
+router.get('/jobs/:fromdate/:todate/:refno', (req, resp) => {
+    const { fromdate, todate, refno } = req.params
+    jobController.findJobs(
+      req, 
+      resp, 
+      fromdate, 
+      todate, 
+      refno,
+    )
 })
 
 
 
-apiRoute.get('/', function(req, resp) {
+router.get('/', function(req, resp) {
     httpMsg.showHome(req, resp);
 });
 
-app.use('/api', apiRoute);
+app.use('/api', router);
 app.listen(settings.webPort);
 console.log('Service started at http://localhost:' + settings.webPort);
