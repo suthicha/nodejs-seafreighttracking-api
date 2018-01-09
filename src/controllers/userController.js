@@ -47,7 +47,7 @@ exports.update = (req, resp, id) => {
     try {
         if(!id) throw new Error("Input not valid");
         
-        const { LoginName, FirstName, Email, PhoneNO, UserGroupID } = req.body;
+        const { LoginName, FirstName, LastName, Email, PhoneNO, UserGroupID } = req.body;
         var conn = new mssql.Connection(settings.dbConfig);
         conn.connect()
             .then(()=> {
@@ -84,7 +84,7 @@ exports.delete = (req, resp, id) => {
                 cmd.input('UserID', id)
                 .execute('sp_delete_user')
                 .then(()=>{ httpMsg.show200(req, resp)})
-                .catch((error)=>{throw new Error(error.message)})
+                .catch((error)=>{ httpMsg.show500(req, resp, error)})
             }
         )
 

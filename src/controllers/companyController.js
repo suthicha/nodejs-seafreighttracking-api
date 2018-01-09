@@ -27,7 +27,7 @@ exports.add = (req, resp, id) => {
                 .input('UserID', UserID)
                 .execute('sp_insert_company')
                 .then(()=>{ httpMsg.show200(req, resp) })
-                .catch((error)=>{ throw new Error(error.message) })
+                .catch((error)=>{ httpMsg.show500(req, resp, error)})
             })
 
     }catch(error){
@@ -56,7 +56,7 @@ exports.update = (req, resp, id) => {
                 .input('UserID', UserID)
                 .execute('sp_update_company')
                 .then(()=>{ httpMsg.show200(req, resp) })
-                .catch((error)=>{ throw new Error(error.message) })
+                .catch((error)=>{ httpMsg.show500(req, resp, error)})
             })
     }catch(error){
         httpMsg.show500(req, resp, error)
@@ -80,7 +80,7 @@ exports.delete = (req, resp, id) => {
                 .input('UserID', id)
                 .execute('sp_delete_company')
                 .then(()=>{ httpMsg.show200(req, resp) })
-                .catch((error)=> { throw new Error(error.message) })
+                .catch((error)=> { httpMsg.show500(req, resp, error)})
             })
 
     }catch(error){
@@ -102,7 +102,7 @@ exports.getCompanies = (req, resp, id) => {
                 cmd.input('UserID', id)
                 .execute('sp_select_company')
                 .then((data)=> { httpMsg.sendJson(req, resp, data)})
-                .catch((error)=> { throw new Error(error.message)})
+                .catch((error)=> { httpMsg.show500(req, resp, error)})
             })
 
     }catch(error){

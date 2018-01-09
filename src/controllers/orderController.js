@@ -19,10 +19,10 @@ exports.execute = (req, resp, id) => {
         
         // create sql command text.
         const order = Object.assign({}, req.body)
-
+        
         // init sqlconnection and executed.
-        var conn = new mssql.Connection(settings.dbSysfConfig)
-        conn.connect()
+        var conn = new mssql.Connection(settings.dbConfig)
+            conn.connect()
             .then(()=> {
                 var cmd = new mssql.Request(conn)
                 cmd.input('MasterJobNo', order.MasterJobNo)
@@ -57,7 +57,7 @@ exports.execute = (req, resp, id) => {
                 .input('TrxNo', order.TrxNo)
                 .execute('sp_post_shipment')
                 .then(()=>{ httpMsg.show200(req, resp) })
-                .catch((error) => { httpMsg.show404(req, resp) })
+                .catch((error) => { httpMsg.show500(req, resp, error) })
             })
             .catch((error)=> { throw new Error(error.message)})
 

@@ -1,6 +1,5 @@
 var express = require('express')
 var cors = require('cors')
-var app = express()
 var bodyParser = require('body-parser')
 var jwt = require('jsonwebtoken')
 var settings = require('./settings')
@@ -10,13 +9,16 @@ var userController  = require('./controllers/userController')
 var jobController = require('./controllers/jobController')
 var orderController = require('./controllers/orderController')
 var companyController = require('./controllers/companyController')
+var app = express()
 
 app.set('secert', settings.secert)
 app.use(cors())
 app.use(bodyParser.urlencoded({ extended: false  }))
 app.use(bodyParser.json())
 
-// basic route (http://localhost:<port>)
+// -----------------------------------------------
+// show web api port.
+// -----------------------------------------------
 app.get('/', function(req, resp) {
     resp.send('The API is at the http://localhost:' + settings.webPort + '/api')
 });
@@ -34,32 +36,32 @@ router.post('/login', function(req, resp) {
 // ---------------------------------------------------------
 // route middleware to authenticate and check token
 // ---------------------------------------------------------
-// apiRoute.use(function(req, resp, next) {  
-//     if (req.method == 'POST' && req.url == '/register') {
-//       next();
-//     }
-//     else {
-//       var token = req.body.token || req.param('token') || req.headers['x-access-token'];
-//       if (token){
-//         // verifies secret and checks exp
-//         jwt.verify(token, app.get('secert'), function(err, decoded) {
-//           if (err) {
-//             return resp.json({ auth: { authenticated: false, message: 'Failed to authenticate token.'} });
-//           } else {
-//             // if everything is good, save to request for use in other routes
-//             req.decoded = decoded;
-//             next();
-//           }
-//         });
-//       }
-//       else {
-//           return resp.status(403).send({
-//             success: false,
-//             message: 'No token provided.'
-//           });
-//       }
-//     }
-// });
+router.use((req, resp, next) => {  
+    if (req.method == 'POST' && req.url == '/register') {
+      next();
+    }
+    else {
+      var token = req.body.token || req.param('token') || req.headers['x-access-token'];
+      if (token){
+        // verifies secret and checks exp
+        jwt.verify(token, app.get('secert'), function(err, decoded) {
+          if (err) {
+            return resp.json({ auth: { authenticated: false, message: 'Failed to authenticate token.'} });
+          } else {
+            // if everything is good, save to request for use in other routes
+            req.decoded = decoded;
+            next();
+          }
+        });
+      }
+      else {
+          return resp.status(403).send({
+            success: false,
+            message: 'No token provided.'
+          });
+      }
+    }
+})
 
 
 // -----------------------------------------------
@@ -156,7 +158,7 @@ router.get('/booking/:refno', (req, resp) => {
     jobController.findBooking(
       req, 
       resp, 
-      etd,
+      refno,
     )
 })
 

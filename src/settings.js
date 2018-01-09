@@ -1,17 +1,17 @@
 
 exports.webPort = 5015;
-exports.secert = "V49TEDHdcQ";
+exports.secert = "6iYtSyoGx3";
 exports.dbConfig = {
-	user: 'sa',
-	password: 'cti2016',
-	server: '127.0.0.1',
+	user: '',
+	password: '',
+	server: '',
 	port: 1433,
 	database: 'CTISEATK'
 }
 exports.dbSysfConfig = {
-	user: 'sa',
-	password: 'cti2016',
-	server: '127.0.0.1',
+	user: '',
+	password: '',
+	server: '',
 	port: 1433,
 	database: 'CTITBKK8',
 	connectionTimeout: 0,

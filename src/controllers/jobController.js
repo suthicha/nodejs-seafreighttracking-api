@@ -26,7 +26,7 @@ exports.findJobs = (req, resp, etd) => {
                 var cmd = new mssql.Request(conn)
                 cmd.query(commandText)
                 .then((data)=>{ httpMsg.sendJson(req, resp, data) })
-                .catch((error) => { httpMsg.show404(req, resp) })
+                .catch((error) => { httpMsg.show500(req, resp, error) })
             })
             .catch((error)=> { throw new Error(error.message)})
 
@@ -50,7 +50,7 @@ exports.findBooking = (req, resp, refno) => {
                 var cmd = new mssql.Request(conn)
                 cmd.query(commandText)
                 .then((data)=> { httpMsg.sendJson(req, resp, data) })
-                .catch((error)=> { httpMsg.show404(req, resp) })
+                .catch((error)=> { httpMsg.show500(req, resp, error) })
             })
 
     }catch (error) {

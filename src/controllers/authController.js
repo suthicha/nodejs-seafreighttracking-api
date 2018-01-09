@@ -24,8 +24,8 @@ exports.login = (req, resp) => {
             conn.connect()
             .then(()=> {
                 var cmd = new mssql.Request(conn)
-                cmd.input('LoginName', objUser.LoginName)
-                .input('Password', objUser.Password)
+                cmd.input('LoginName', LoginName)
+                .input('Password', Password)
                 .execute("sp_auth_user")
                 .then((data) => {
                     var userInfo = data[0][0];
@@ -39,7 +39,7 @@ exports.login = (req, resp) => {
                         // create token with jwt.
                         encodeTokenString = jwt.sign(
                             {
-                             LoginName: objUser.LoginName,
+                             LoginName: LoginName,
                              UserID: userInfo.UserID,
                              UserGroupID: 1
                             }, 
