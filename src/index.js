@@ -8,11 +8,12 @@ var httpMsg = require('./core/httpMsg')
 var authController = require('./controllers/authController')
 var userController  = require('./controllers/userController')
 var jobController = require('./controllers/jobController')
+var orderController = require('./controllers/orderController')
 
-app.set('secert', settings.secert);
-app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false  }));
-app.use(bodyParser.json());
+app.set('secert', settings.secert)
+app.use(cors())
+app.use(bodyParser.urlencoded({ extended: false  }))
+app.use(bodyParser.json())
 
 // basic route (http://localhost:<port>)
 app.get('/', function(req, resp) {
@@ -88,6 +89,19 @@ router.get('/jobs/:fromdate/:todate/:refno', (req, resp) => {
     )
 })
 
+
+// -----------------------------------------------
+// order routes.
+// -----------------------------------------------
+router.get('/orders/:etd', (req, resp) => {
+    const { etd } = req.params
+    orderController.findOrdersByEtd(req, resp, etd)
+})
+
+router.get('/orders/:fromdate/:todate', (req, resp) => {
+    const { fromdate, todate } = req.params
+    orderController.findOrders(req, resp, fromdate, todate)
+})
 
 
 router.get('/', function(req, resp) {
