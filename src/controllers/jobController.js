@@ -13,10 +13,11 @@ var settings = require('../settings')
 // -----------------------------------------------
 // find shipment information from job control system.
 // -----------------------------------------------
-exports.findJobs = (req, resp, fromdate, todate, refno) => {
+exports.findJobs = (req, resp, etd) => {
     try{
+        if (!etd) throw new Error('input not valid')
         // create sql command text.
-        const commandText = statmentBuilder.getShipmentCommandText (fromdate, todate, refno)
+        const commandText = statmentBuilder.createFindShipmentByEtdCommandText(etd)
         
         // init sqlconnection and executed.
         var conn = new mssql.Connection(settings.dbSysfConfig)
@@ -32,6 +33,28 @@ exports.findJobs = (req, resp, fromdate, todate, refno) => {
     }
     catch (error) {
         httpMsg.show500(req, resp, error.message);
+    }
+}
+
+// -----------------------------------------------
+// find order by etd
+// -----------------------------------------------
+exports.findBooking = (req, resp, refno) => {
+    try{
+        if (!refno) throw new Error('input not valid')
+        const commandText = statmentBuilder.createFindShipmentByRefCommandText(refno)
+        
+        var conn = new mssql.Connection(settings.dbSysfConfig)
+        conn.connect()
+            .then(()=> {
+                var cmd = new mssql.Request(conn)
+                cmd.query(commandText)
+                .then((data)=> { httpMsg.sendJson(req, resp, data) })
+                .catch((error)=> { httpMsg.show404(req, resp) })
+            })
+
+    }catch (error) {
+        httpMsg.show500(req, resp, error)
     }
 }
 

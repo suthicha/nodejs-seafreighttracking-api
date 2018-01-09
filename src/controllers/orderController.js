@@ -13,9 +13,9 @@ var settings = require('../settings')
 // -----------------------------------------------
 // find shipment information from job control system.
 // -----------------------------------------------
-exports.add = (req, resp) => {
+exports.execute = (req, resp, id) => {
     try{
-        if(!req.body) throw new Error('input not valid')
+        if(!id || !req.body) throw new Error('input not valid')
         
         // create sql command text.
         const order = Object.assign({}, req.body)
@@ -49,7 +49,7 @@ exports.add = (req, resp) => {
                 .input('DeliveryDate', order.DeliveryDate)
                 .input('UserID', order.UserID)
                 .input('CreateDateTime', order.CreateDateTime)
-                .input('UpdateBy', order.UpdateBy)
+                .input('UpdateBy', id)
                 .input('UpdateDateTime', order.UpdateDateTime)
                 .input('ShipmentStatus', order.ShipmentStatus)
                 .input('Remark', order.Remark)
@@ -91,18 +91,18 @@ exports.findOrders = (req, resp, fromdate, todate) => {
 }
 
 // -----------------------------------------------
-// find order by etd
+// find order by etd.
 // -----------------------------------------------
-exports.findOrdersByEtd = (req, resp, etd) => {
+exports.findOrderByEtd = (req, resp, etd) => {
     try{
         if (!etd) throw new Error('input not valid')
-
+        
         var conn = new mssql.Connection(settings.dbConfig)
         conn.connect()
             .then(()=> {
                 var cmd = new mssql.Request(conn)
                 cmd.input('etd', etd)
-                .execute('sp_shipment_etd')
+                .execute('sp_order_select_etd')
                 .then((data)=> { httpMsg.sendJson(req, resp, data) })
                 .catch((error)=> { httpMsg.show404(req, resp) })
             })

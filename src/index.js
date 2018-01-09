@@ -9,6 +9,7 @@ var authController = require('./controllers/authController')
 var userController  = require('./controllers/userController')
 var jobController = require('./controllers/jobController')
 var orderController = require('./controllers/orderController')
+var companyController = require('./controllers/companyController')
 
 app.set('secert', settings.secert)
 app.use(cors())
@@ -17,16 +18,16 @@ app.use(bodyParser.json())
 
 // basic route (http://localhost:<port>)
 app.get('/', function(req, resp) {
-    resp.send('The API is at the http://localhost:' + settings.webPort + '/api');
+    resp.send('The API is at the http://localhost:' + settings.webPort + '/api')
 });
 
-var router = express.Router();
+var router = express.Router()
 
 router.put('/register', function(req, resp) { 
     userController.register(req, resp)
 });
 
-router.post('/authenticate', function(req, resp) {
+router.post('/login', function(req, resp) {
     authController.login(req, resp)
 });
 
@@ -64,30 +65,101 @@ router.post('/authenticate', function(req, resp) {
 // -----------------------------------------------
 // User controller.
 // -----------------------------------------------
-router.post('/user/:id', (req, resp) => { 
+router.get('/users/:id', (req, resp) => {
     const { id } = req.params
-    userController.update(req, resp, id)
+    userController.getAll(
+        req, 
+        resp, 
+        id,
+    )
 })
 
+router.post('/user/:id', (req, resp) => { 
+    const { id } = req.params
+    userController.update(
+        req, 
+        resp, 
+        id,
+    )
+})
+
+router.post('/user/recoverpassword', (req, resp) => {
+    userController.resetPassword(
+        req,
+        resp,
+    )
+})
 
 router.delete('/user/:id', (req, resp) => {
     const { id } = req.params
+    userController.delete(
+        req,
+        resp,
+        id,
+    )
+})
+
+// -----------------------------------------------
+// company routes.
+// -----------------------------------------------
+router.get('/company/:id', (req, resp) => {
+    const { id } = req.params
+    companyController.getCompanies(
+        req,
+        resp,
+        id,
+    )
+})
+
+router.put('/company/:id', (req, resp) => {
+    const { id } = req.params
+    companyController.add(
+        req,
+        resp,
+        id,
+    )
+})
+
+router.post('/company/:id', (req, resp) => {
+    const { id } = req.params
+    companyController.update(
+        req,
+        resp,
+        id,
+    )
+})
+
+router.delete('/company/:id', (req, resp) => {
+    const { id } = req.params
+    companyController.delete(
+        req,
+        resp,
+        id,
+    )
 })
 
 
 // -----------------------------------------------
-// Job and shipment routes.
+// job shipment routes.
 // -----------------------------------------------
-router.get('/jobs/:fromdate/:todate/:refno', (req, resp) => {
-    const { fromdate, todate, refno } = req.params
+router.get('/jobs/:etd', (req, resp) => {
+    const { etd } = req.params
     jobController.findJobs(
       req, 
       resp, 
-      fromdate, 
-      todate, 
-      refno,
+      etd,
     )
 })
+
+router.get('/booking/:refno', (req, resp) => {
+    const { refno } = req.params
+    jobController.findBooking(
+      req, 
+      resp, 
+      etd,
+    )
+})
+
 
 
 // -----------------------------------------------
@@ -95,16 +167,34 @@ router.get('/jobs/:fromdate/:todate/:refno', (req, resp) => {
 // -----------------------------------------------
 router.get('/orders/:etd', (req, resp) => {
     const { etd } = req.params
-    orderController.findOrdersByEtd(req, resp, etd)
+    orderController.findOrderByEtd(
+        req, 
+        resp, 
+        etd,
+    )
 })
 
 router.get('/orders/:fromdate/:todate', (req, resp) => {
     const { fromdate, todate } = req.params
-    orderController.findOrders(req, resp, fromdate, todate)
+    orderController.findOrders(
+        req, 
+        resp, 
+        fromdate, 
+        todate,
+    )
+})
+
+router.put('/order/:id', (req, resp) => {
+    const { id } = req.params
+    orderController.execute(
+        req,
+        resp,
+        id,
+    )
 })
 
 
-router.get('/', function(req, resp) {
+router.get('/', (req, resp) => {
     httpMsg.showHome(req, resp);
 });
 
